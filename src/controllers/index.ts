@@ -1,7 +1,11 @@
-import { Game, GameMove, GameStatus } from '../entities/game';
+import PouchDb from 'pouchdb-node';
+import PouchDbFind from 'pouchdb-find';
+
+import { Game, GameMove, GameStatus, GameType } from '../entities/game';
+import config from '../utils/config';
 import logger from '../utils/logger';
 
-const db:Game[] = [];
+PouchDb.plugin(PouchDbFind);
 
 class RockPaperScissors {
 	constructor() {}
@@ -47,42 +51,50 @@ class RockPaperScissors {
 export class GameController {
 
 	private readonly rockPaperScissors = new RockPaperScissors();
+	private readonly db = new PouchDb(config.get('POUCHDB_URL'));
 
-	constructor() {}
+	constructor() {
+		// Indexing for pouchdb??
+	}
 
-	create (data: any): Game {
-		logger.info('Create a new game');
-		// TODO: Refactor
-		const id = String(Math.random() * 10000000);
+	async create (data: any): Promise<Game> {
+		logger.info('GameController:create: Create a new game');
+
+		// Ensure for player vs computer computer gets a rando move
 		if(!data.opponent) {
 			data.moves = [this.rockPaperScissors.randomMove()];
+		} else {
+			data.type = GameType.PVP;
 		}
-		const game = Game.create({ ...data, id });
-		db.push(game);
+		
+		const result = await this.db.post(Game.create(data));
+		const game: Game = await this.db.get(result.id);
 
 		return game;
 	}
 
-	play(id: string, data: any): Game {
-		logger.info('play game')
-		const game = db.find(game => game.id === id);
-
+	async play(id: string, data: any): Promise<Game> {
+		logger.info('GameController:play - challenge play');
+		const game: Game = await this.db.get(id);
 		// compare moves and make verdict
 		const result = this.rockPaperScissors.getResult(game.moves[0], data.move);
 
-		game['status'] = result;
+		game.status = result;
 		game.moves = [...game.moves, data.move];
 
-		return game;
+		await this.db.put(game);
+
+		return this.db.get(game._id);
 	}
 
-	getGames(query: any): Game[] {
-		logger.info('get games');
-		return db.filter(game => {
-			return !!Object.keys(query).find(key => {
-				return game[key] === query[key];
-			})?.length;
+	async getGames(query: any): Promise<Game[]> {
+		logger.info('GameController:getGames - get games');
+
+		const docs = await this.db.find({
+			selector: query,
 		});
+
+		return docs.docs.map(doc => Game.create(doc));
 	}
 }
 

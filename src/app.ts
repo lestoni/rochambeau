@@ -2,7 +2,6 @@ import path from 'path';
 import fs from 'fs';
 
 import express from 'express';
-import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 import gracefulShutdown from 'http-graceful-shutdown';
 import morgan from 'morgan';
@@ -15,8 +14,6 @@ import { ip } from './utils/meta';
 
 const swaggerDocument = fs.readFileSync(path.resolve(__dirname, '../swagger/swagger.json'), 'utf8');
 const app = express();
-
-dotenv.config();
 
 app.use(morgan('tiny'));
 

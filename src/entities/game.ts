@@ -17,7 +17,7 @@ export enum GameType {
 }
 
 export class Game {
-  public id: string;
+  public _id: string;
   public challenger: string;
   public opponent: string = 'computer';
   public moves: GameMove[] = [];
@@ -27,18 +27,15 @@ export class Game {
   constructor() {}
 
   static create(data: any): Game {
-    const { challenger, opponent, moves, id } = data;
+    const { challenger, opponent, moves, _id, type } = data;
 
     const instance = new Game();
 
-    instance.id = id;
+    instance._id = _id;
     instance.challenger = challenger;
     instance.moves = moves;
-
-    if(opponent) {
-      instance.opponent = opponent;
-      instance.type = GameType.PVP;
-    }
+    instance.opponent = opponent;
+    instance.type = type;
 
     return instance;
   }

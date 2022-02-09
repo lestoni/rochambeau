@@ -7,7 +7,7 @@ import { GameController } from '../controllers';
 import { Game, GameStatus } from '../entities/game';
 
 
-const controller = new GameController();
+const gameController = new GameController();
 const router = Router();
 
 router.get('/', (req: Request, res: Response): void => {
@@ -25,18 +25,12 @@ router.get('/', (req: Request, res: Response): void => {
   });
 });
 
-/**
- * endpoints ->
- *  GET /games -> see all games
- *  GET /games/:id -> see one game
- *  POST /games -> new game
- */
 
-router.post('/games', (req: Request, res: Response) => {
+router.post('/games', async (req: Request, res: Response) => {
   try {
     let game: Game;
 
-    game = controller.create({
+    game = await gameController.create({
       challenger: req.body.challenger,
       opponent: req.body.opponent,
       type: req.body.type,
@@ -51,11 +45,11 @@ router.post('/games', (req: Request, res: Response) => {
   }
 });
 
-router.get('/games', (req: Request, res: Response) => {
+router.get('/games', async (req: Request, res: Response) => {
   try {
     // TODO: Remove when Auth is implemented
     const { challenger, opponent } = req.query;
-    const games = controller.getGames({ challenger, opponent, status: 'new' });
+    const games = await gameController.getGames({ challenger, opponent, status: 'new' });
 
     res.json(games)
 
@@ -65,10 +59,10 @@ router.get('/games', (req: Request, res: Response) => {
   }
 });
 
-router.put('/games/:id', (req: Request, res: Response) => {
+router.put('/games/:id', async (req: Request, res: Response) => {
   try {
     // TODO: Remove when Auth is implemented
-    const game = controller.play(req.params.id, req.body);
+    const game = await gameController.play(req.params.id, req.body);
 
     let result = game.status;
     if(result === GameStatus.LOSE) {
