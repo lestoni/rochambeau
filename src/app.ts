@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 import gracefulShutdown from 'http-graceful-shutdown';
 import morgan from 'morgan';
+import bodyParser from 'body-parser';
 
 import router from './routes';
 import logger from './utils/logger';
@@ -19,7 +20,9 @@ dotenv.config();
 
 app.use(morgan('tiny'));
 
-// Serve Swaggger APi Docs
+app.use(bodyParser.json());
+
+// Serve Swaggger API Docs
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(JSON.parse(swaggerDocument.toString())));
 
 // API Routes Handler
