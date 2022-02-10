@@ -1,86 +1,39 @@
-import { Router, Request, Response, query } from 'express';
+import { Request, Response, Express } from 'express';
 
 import logger from '../utils/logger';
 import config from '../utils/config';
 import { pkg, ip } from '../utils/meta';
-import { GameController } from '../controllers';
-import { Game, GameStatus } from '../entities/game';
+import authRouter from './auth';
+import gameRouter from './game';
+import userRouter from './user';
+import { AuthService } from '../services/auth';
 
 
-const gameController = new GameController();
-const router = Router();
+function bindRoutes(app: Express) {
+  
+  AuthService.init(app);
 
-router.get('/', (req: Request, res: Response): void => {
-  logger.info('View api info');
+  app.use('/v1/auth', authRouter);
 
-  const port = config.get('PORT');
-  const { version, name, description } = pkg;
+  app.use('/v1/users', AuthService.authenticate(), userRouter);
 
-  res.json({
-    message: 'Welcome to Gulag!',
-    documentation: `http://localhost:${port}/docs or http://${ip}:${port}/docs`,
-    version,
-    description,
-    name
-  });
-});
+  app.use('/v1/games', AuthService.authenticate(), gameRouter);
 
-
-router.post('/games', async (req: Request, res: Response) => {
-  try {
-    let game: Game;
-
-    game = await gameController.create({
-      challenger: req.body.challenger,
-      opponent: req.body.opponent,
-      type: req.body.type,
-      moves: [req.body.move]
-    });
-
-    res.json(game);
-
-  } catch (error) {
-    logger.error(error);
-    res.json(error);
-  }
-});
-
-router.get('/games', async (req: Request, res: Response) => {
-  try {
-    // TODO: Remove when Auth is implemented
-    const { challenger, opponent } = req.query;
-    const games = await gameController.getGames({ challenger, opponent, status: 'new' });
-
-    res.json(games)
-
-  } catch(error) {
-    logger.error(error);
-    res.json(error);
-  }
-});
-
-router.put('/games/:id', async (req: Request, res: Response) => {
-  try {
-    // TODO: Remove when Auth is implemented
-    const game = await gameController.play(req.params.id, req.body);
-
-    let result = game.status;
-    if(result === GameStatus.LOSE) {
-      result = GameStatus.WIN;
-    } else if(result === GameStatus.WIN) {
-      result = GameStatus.LOSE;
-    }
-
+  app.use('/v1', (req: Request, res: Response): void => {
+    logger.info('View api info');
+  
+    const port = config.get('PORT');
+    const { version, name, description } = pkg;
+  
     res.json({
-      result,
-      game,
+      message: 'Welcome to Gulag!',
+      documentation: `http://localhost:${port}/docs or http://${ip}:${port}/docs`,
+      version,
+      description,
+      name
     });
-
-  } catch(error) {
-    logger.error(error);
-    res.json(error);
-  }
-});
+  }); 
+}
 
 
-export default router;
+export default bindRoutes;
