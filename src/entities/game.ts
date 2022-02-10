@@ -16,13 +16,15 @@ export enum GameType {
   PVP = 'player_vs_player',
 }
 
+const Rochambeau = 'computer';
+
 export class Game {
   public _id: string;
   public challenger: string;
-  public opponent: string = 'computer';
-  public moves: GameMove[] = [];
+  public opponent: string;
+  public moves: GameMove[];
   public status: GameStatus = GameStatus.NEW;
-  public type: GameType = GameType.PVC;
+  public type: GameType;
 
   constructor() {}
 
@@ -33,9 +35,9 @@ export class Game {
 
     instance._id = _id;
     instance.challenger = challenger;
-    instance.moves = moves;
-    instance.opponent = opponent;
-    instance.type = type;
+    instance.moves = moves || [];
+    instance.opponent = opponent || Rochambeau;
+    instance.type = type || GameType.PVC;
 
     return instance;
   }
