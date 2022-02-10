@@ -7,10 +7,10 @@ import gracefulShutdown from 'http-graceful-shutdown';
 import morgan from 'morgan';
 import bodyParser from 'body-parser';
 
-import router from './routes';
 import logger from './utils/logger';
 import config from './utils/config';
 import { ip } from './utils/meta';
+import bindRoutes from './routes';
 
 const swaggerDocument = fs.readFileSync(path.resolve(__dirname, '../swagger/swagger.json'), 'utf8');
 const app = express();
@@ -23,7 +23,7 @@ app.use(bodyParser.json());
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(JSON.parse(swaggerDocument.toString())));
 
 // API Routes Handler
-app.use('/v1', router);
+bindRoutes(app);
 
 // Default handler for unknown routes
 app.use('*', (req, res) => {
