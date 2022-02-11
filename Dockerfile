@@ -1,10 +1,28 @@
-FROM node:lts-alpine
-ENV NODE_ENV=production
-WORKDIR /usr/src/app
-COPY ["package.json", "package-lock.json*", "npm-shrinkwrap.json*", "./"]
-RUN npm install --production --silent && mv node_modules ../
-COPY . .
-EXPOSE 3000
-RUN chown -R node /usr/src/app
+
+# STAGE 1
+FROM node:bullseye-slim as builder
+RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
+WORKDIR /home/node/app
+COPY package*.json ./
+RUN npm config set unsafe-perm true
+RUN npm install -g typescript
+RUN npm install -g ts-node
 USER node
-CMD ["npm", "start"]
+RUN npm install
+COPY --chown=node:node . .
+RUN npm run build
+
+# STAGE 2
+FROM node:12-alpine
+RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
+WORKDIR /home/node/app
+COPY package*.json ./
+USER node
+
+RUN npm install --production
+COPY --from=builder /home/node/app/dist ./dist
+
+COPY --chown=node:node .env .
+
+EXPOSE 8000
+CMD [ "node", "dist/app.js" ]

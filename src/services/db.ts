@@ -7,8 +7,11 @@ import logger from '../utils/logger';
 
 PouchDb.plugin(PouchDbFind);
 
+const dbUrl = config.get('NODE_ENV').toLocaleLowerCase() === 'production' 
+	? config.get('POUCHDB_URL') : config.get('POUCHDB_URL_TEST')
+
 export class DbService {
-	private readonly db = new PouchDb(config.get('POUCHDB_URL'));
+	private readonly db = new PouchDb(dbUrl);
 
 	constructor() {
     this.db.createIndex({
@@ -52,6 +55,10 @@ export class DbService {
 		});
 
 		return docs.docs;
+	}
+
+	async reset() {
+		await this.db.destroy();
 	}
 }
 

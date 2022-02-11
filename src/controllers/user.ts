@@ -48,7 +48,7 @@ export class UserController {
 		const passHash = await bcrypt.hash(password, this.passSaltRounds);
 
 		const user = await this.dbService.create(User.create({ ...data, password: passHash }), {
-			fields: ['_id', 'username', 'score']
+			fields: ['_id', 'username', 'score', 'accessToken']
 		});
 
 		return user;

@@ -22,6 +22,8 @@ $ ./tools/build-docker.sh
 
 ### API
 
+RESTFul API is accessible via `/v1`. 
+
 ### Swagger Docs
 
 API Documentation is available in `http://localhost:8000/docs`.
