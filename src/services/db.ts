@@ -22,7 +22,7 @@ export class DbService {
 
 
 	async create (data: any): Promise<any> {
-		logger.info('DbSrvice:create: Create a new entity');
+		logger.info('DbService:create: Create a new entity');
 
 		const result = await this.db.post(data);
 		const entity = await this.db.get(result.id);

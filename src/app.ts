@@ -22,6 +22,9 @@ app.use(bodyParser.json());
 // Serve Swaggger API Docs
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(JSON.parse(swaggerDocument.toString())));
 
+// Dev: tiny UI
+app.use('/ui', express.static('./public'));
+
 // API Routes Handler
 bindRoutes(app);
 
