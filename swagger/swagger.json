@@ -12,6 +12,14 @@
     {
       "name": "user",
       "description": "User"
+    },
+    {
+      "name": "game",
+      "description": "Game"
+    },
+    {
+      "name": "auth",
+      "description": "Auth"
     }
   ],
   "schemes": [
@@ -33,6 +41,132 @@
         "responses": {
           "200": {
             "description": "List of users"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login with credentials",
+        "description": "",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "username",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "password",
+            "required": true
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "User logged in with token"
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Register with credentials",
+        "description": "",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "username",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "password",
+            "required": true
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Done"
+          }
+        }
+      }
+    },
+    "/games": {
+      "post": {
+        "tags": [
+          "game"
+        ],
+        "summary": "Start a new challenge",
+        "description": "",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "move",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "opponentId",
+            "required": true
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Challenge is new!"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "game"
+        ],
+        "summary": "Play game challenge",
+        "description": "",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "move",
+            "required": true
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "result"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "game"
+        ],
+        "summary": "Get games",
+        "description": "",
+        "parameters": [
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of games"
           }
         }
       }
