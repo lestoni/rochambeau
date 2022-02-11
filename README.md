@@ -32,3 +32,4 @@ API Documentation is available in `http://localhost:8000/docs`.
 ## Improvements
 
 - Use streaming to play in realtime
+- data validation(Schemas)
