@@ -39,6 +39,7 @@ gameRouter.post('/', async (req: Request, res: Response) => {
   }
 });
 
+// View all games for the logged in users
 gameRouter.get('/', async (req: Request, res: Response) => {
   try {
     const { _id } = req.user as User;
