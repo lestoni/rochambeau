@@ -1,0 +1,1 @@
+export const testUser = { username: 'testUser3', password: 'password' };
