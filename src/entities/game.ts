@@ -20,8 +20,8 @@ const Rochambeau = 'computer';
 
 export class Game {
   public _id: string;
-  public challenger: string;
-  public opponent: string;
+  public challengerId: string;
+  public opponentId: string;
   public moves: GameMove[];
   public status: GameStatus = GameStatus.NEW;
   public type: GameType;
@@ -29,14 +29,14 @@ export class Game {
   constructor() {}
 
   static create(data: any): Game {
-    const { challenger, opponent, moves, _id, type } = data;
+    const { challengerId, opponentId, moves, _id, type } = data;
 
     const instance = new Game();
 
     instance._id = _id;
-    instance.challenger = challenger;
+    instance.challengerId = challengerId;
     instance.moves = moves || [];
-    instance.opponent = opponent || Rochambeau;
+    instance.opponentId = opponentId || Rochambeau;
     instance.type = type || GameType.PVC;
 
     return instance;

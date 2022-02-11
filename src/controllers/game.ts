@@ -2,7 +2,7 @@ import { Game, GameMove, GameStatus, GameType } from '../entities/game';
 import logger from '../utils/logger';
 import { DbService } from '../services/db';
 
-class RockPaperScissors {
+export class RockPaperScissors {
 	constructor() {}
 
 	randomMove(): string {
@@ -10,7 +10,7 @@ class RockPaperScissors {
 		return moves[Math.floor(Math.random() * moves.length)].toLocaleLowerCase();
 	}
 
-	getResult(firstMove: GameMove, otherMove: GameMove): GameStatus {
+	getResult(firstMove: any, otherMove: any): GameStatus {
 		if(firstMove === otherMove) {
 			return GameStatus.TIE;
 		}
@@ -50,41 +50,70 @@ export class GameController {
 
 	constructor() {}
 
-	async create (data: any): Promise<Game> {
+	async create (userId: string, data: any): Promise<Game> {
 		logger.info('GameController:create: Create a new game');
 
-		// Ensure for player vs computer computer gets a rando move
-		if(!data.opponent) {
-			data.moves = [this.rockPaperScissors.randomMove()];
-		} else {
+		if(data.opponentId) {
 			data.type = GameType.PVP;
 		}
 
-    const game: Game = await this.dbService.create(Game.create(data));
+    let game: Game = await this.dbService.create(Game.create(data));
 
 		return game;
 	}
 
-	async play(id: string, data: any): Promise<Game> {
+	get randomMove () {
+		return this.rockPaperScissors.randomMove();
+	}
+
+
+	async play(userId: string, gameId: string, data: any): Promise<any> {
 		logger.info('GameController:play - challenge play');
-		const game: Game = await this.dbService.getOne(id);
+		let game: Game = await this.dbService.getOne(gameId);
     if(game.status !== GameStatus.NEW) {
       throw { error: 'Challenge completed!' };
     }
-		// compare moves and make verdict
-		const result = this.rockPaperScissors.getResult(game.moves[0], data.move);
+		
+		if(game.opponentId !== userId && game.type !== GameType.PVC) {
+			throw { error: 'Do not play yourself!' };
+		}
 
-    return this.dbService.update(id, {
-      status: result,
+		// compare moves and make verdict
+		const challengerResult = this.rockPaperScissors.getResult(
+			game.moves[0].toLocaleLowerCase(),
+			data.move.toLocaleLowerCase(),
+		);
+
+		let opponentResult: GameStatus;
+    if(challengerResult === GameStatus.WIN) {
+      opponentResult = GameStatus.LOSE;
+    } else if(challengerResult === GameStatus.LOSE) {
+      opponentResult = GameStatus.WIN;
+    } else {
+			opponentResult = challengerResult;
+		}
+
+    game = await this.dbService.update(gameId, {
+      status: challengerResult,
       moves: [...game.moves, data.move]
     });
+
+		let result: any;
+
+		if(game.type === GameType.PVC) {
+			result = challengerResult;
+		} else {
+			result = opponentResult;
+		}
+
+		return { result, game };
 	}
 
 	async getGames(userId: string): Promise<Game[]> {
 		logger.info('GameController:getGames - get new challenged games');
 
 		const docs = await this.dbService.find({
-			opponent: userId,
+			opponentId: userId,
 			status: GameStatus.NEW
 		});
 
@@ -96,7 +125,7 @@ export class GameController {
 
 		const docs = await this.dbService.find({
 			$or: [
-				{ challenger: userId },
+				{ challengerId: userId },
 				{ opponent: userId }
 			]
 		});
