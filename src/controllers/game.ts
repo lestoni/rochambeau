@@ -80,10 +80,26 @@ export class GameController {
     });
 	}
 
-	async getGames(query: any): Promise<Game[]> {
-		logger.info('GameController:getGames - get games');
+	async getGames(userId: string): Promise<Game[]> {
+		logger.info('GameController:getGames - get new challenged games');
 
-		const docs = await this.dbService.find(query);
+		const docs = await this.dbService.find({
+			opponent: userId,
+			status: GameStatus.NEW
+		});
+
+		return docs.map(doc => Game.create(doc));
+	}
+
+	async history(userId: string): Promise<Game[]> {
+		logger.info('GameController:history - view all games');
+
+		const docs = await this.dbService.find({
+			$or: [
+				{ challenger: userId },
+				{ opponent: userId }
+			]
+		});
 
 		return docs.map(doc => Game.create(doc));
 	}

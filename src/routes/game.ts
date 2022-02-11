@@ -14,7 +14,6 @@ gameRouter.post('/', async (req: Request, res: Response) => {
     const game = await gameController.create({
       challenger: req.body.challenger,
       opponent: req.body.opponent,
-      type: req.body.type,
       moves: [req.body.move]
     });
 
@@ -28,9 +27,8 @@ gameRouter.post('/', async (req: Request, res: Response) => {
 
 gameRouter.get('/', async (req: Request, res: Response) => {
   try {
-    // TODO: Remove when Auth is implemented
-    const { challenger, opponent } = req.query;
-    const games = await gameController.getGames({ challenger, opponent, status: 'new' });
+    const { _id } = req.user as any;
+    const games = await gameController.getGames(_id);
 
     res.json(games)
 
@@ -42,7 +40,6 @@ gameRouter.get('/', async (req: Request, res: Response) => {
 
 gameRouter.put('/:id', async (req: Request, res: Response) => {
   try {
-    // TODO: Remove when Auth is implemented
     const game = await gameController.play(req.params.id, req.body);
 
     let result = game.status;
@@ -56,6 +53,19 @@ gameRouter.put('/:id', async (req: Request, res: Response) => {
       result,
       game,
     });
+
+  } catch(error) {
+    logger.error(error);
+    res.json({ error });
+  }
+});
+
+gameRouter.get('/history', async (req: Request, res: Response) => {
+  try {
+    const { _id } = req.user as any;
+    const games = await gameController.history(_id);
+
+    res.json(games)
 
   } catch(error) {
     logger.error(error);
