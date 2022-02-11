@@ -15,6 +15,7 @@ class App {
 
   private readonly gameController = new GameController();
   private readonly userController = new UserController();
+  private readonly accessToken = process.env.ROCHAMBEAU_ACCESS_TOKEN;
   private gameOpponent: string;
   private gameChallenger: User;
 
@@ -24,7 +25,7 @@ class App {
   }
 
   async isAuthenticated(): Promise<boolean> {
-    if(process.env.ROCHAMBEAU_ACCESS_TOKEN) {
+    if(this.accessToken) {
       const gamer = await this.userController.getOne({
         accessToken: process.env.ROCHAMBEAU_ACCESS_TOKEN
       });
@@ -33,16 +34,14 @@ class App {
         return true
       };
 
-      return false;
+      this.panic('AUTH-ERROR: Invalid Access Token!')
     }
 
-    return false;
+    this.panic('AUTH-ERROR: Access Token is Missing');
   }
 
   async play() {
-    const isAuthenticated = await this.isAuthenticated();
-
-    if(!isAuthenticated) { throw 'Missing AccessToken ' }
+    await this.isAuthenticated();
 
     const { opponentKind } = await inquirer.prompt([
       {
@@ -57,12 +56,12 @@ class App {
       }
     ]);
 
+    if(!opponentKind.length) this.panic('Please select your opponent!')
+
     this.gameOpponent = opponentKind[0]
 
     if(this.gameOpponent === 'player') {
       const player = await this.selectPlayerOpponent();
-      if(!player) this.panic('You have not selected an opponent');
-
       this.gameOpponent = player;
     }
 
@@ -71,7 +70,9 @@ class App {
   }
 
   async selectPlayerOpponent() {
-    const gamers = await this.userController.getAll();
+    const gamers = await this.userController.getAll({
+      accessToken: this.accessToken
+    });
 
     const choices = gamers.map((gamer) => {
       const { username: name, _id: value } = gamer;
@@ -147,7 +148,9 @@ class App {
   }
 
   print(message) {
+    console.log('');
     console.log(message);
+    console.log('\n')
   }
 
   panic (message: string) {
@@ -162,7 +165,8 @@ const runner = async () => {
 
     await app.play();
   } catch (error) {
-    console.log(error)
+    console.log(error);
+    process.exit(1);
   }
 };
 

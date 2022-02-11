@@ -12,19 +12,22 @@ export class UserController {
 
 	constructor() {}
 
-	async getAll(): Promise<User[]> {
+	async getAll(queryOpts: any = {}): Promise<User[]> {
 		logger.info('UserController:getAll - get all users');
 
-		const docs = await this.dbService.find({
-			username: { $exists: true }
-		}, {
+		const query = {
+			username: { $exists: true },
+			...queryOpts
+		};
+
+		const docs = await this.dbService.find(query, {
 			fields: ['_id', 'username', 'score']
 		});
 
 		return docs.map(doc => User.create(doc));
 	}
 
-	async getOne(query: any): Promise<User> {
+	async getOne(query: any = {}): Promise<User> {
 		logger.info('UserController:getOne - get a user');
 
 		const [doc] = await this.dbService.find(query, {
@@ -34,7 +37,7 @@ export class UserController {
 		return User.create(doc);
 	}
 
-	async register(data: any): Promise<User> {
+	async register(data: any = {}): Promise<User> {
 		logger.info('UserController:register - Register new User');
 		const { password, username } = data;
 		const [userExists] = await this.dbService.find({ username });
@@ -51,7 +54,7 @@ export class UserController {
 		return user;
 	}
 
-	async login(data: any): Promise<User> {
+	async login(data: any = {}): Promise<User> {
 		logger.info('UserController:login - Login  User');
 		const { password, username } = data;
 
