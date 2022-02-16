@@ -7,7 +7,7 @@ import logger from '../utils/logger';
 
 PouchDb.plugin(PouchDbFind);
 
-const dbUrl = config.get('NODE_ENV').toLocaleLowerCase() === 'production' 
+const dbUrl = config.get('NODE_ENV')?.toLocaleLowerCase() === 'production' 
 	? config.get('POUCHDB_URL') : config.get('POUCHDB_URL_TEST')
 
 export class DbService {
