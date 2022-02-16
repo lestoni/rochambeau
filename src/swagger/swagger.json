@@ -1,0 +1,331 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Simple RESTFul API to play rock paper scissors with friends",
+    "version": "1.0.0",
+    "title": "Rochambeau",
+    "termsOfService": ""
+  },
+  "host": "localhost:8000",
+  "basePath": "/v1",
+  "tags": [
+    {
+      "name": "user",
+      "description": "User"
+    },
+    {
+      "name": "game",
+      "description": "Game"
+    },
+    {
+      "name": "auth",
+      "description": "Auth"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/users": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Get Users",
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "API Access Token",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of users",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        },
+        "security": {
+          "bearerAuth": []
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login with credentials",
+        "description": "",
+        "parameters": [
+          {
+            "name": "login",
+            "in": "body",
+            "description": "Login Auth details",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserAuth"
+            }
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "User logged in with token",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Register with credentials",
+        "description": "",
+        "parameters": [
+          {
+            "name": "register",
+            "in": "body",
+            "description": "Register Auth details",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserAuth"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated user with accessToken",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        }
+      }
+    },
+    "/games": {
+      "post": {
+        "tags": [
+          "game"
+        ],
+        "summary": "Start a new challenge",
+        "description": "",
+        "parameters": [
+          {
+            "name": "game",
+            "in": "body",
+            "description": "New Game Challenge",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/GameChallenge"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "API Access Token",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Challenge is new! or it's vs computer",
+            "schema": {
+              "$ref": "#/definitions/Game"
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "game"
+        ],
+        "summary": "Play game challenge",
+        "description": "",
+        "parameters": [
+          {
+            "name": "game",
+            "in": "body",
+            "description": "Play Game Challenge",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/GameChallenge"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "API Access Token",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "result",
+            "schema": {
+              "$ref": "#/definitions/GameChallenge"
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "game"
+        ],
+        "summary": "Get games",
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "API Access Token",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of games"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "User": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "accessToken": {
+          "type": "string"
+        },
+        "score": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "username": {
+          "type": "string"
+        }
+      }
+    },
+    "UserAuth": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "GameChallenge": {
+      "type": "object",
+      "properties": {
+        "move": {
+          "type": "string",
+          "description": "Game move",
+          "enum": [
+            "rock",
+            "paper",
+            "scissors"
+          ]
+        },
+        "opponentId": {
+          "type": "string",
+          "description": "Friend Id or omit for Player vs Computer"
+        }
+      }
+    },
+    "GameChallengeResponse": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "string",
+          "description": "Game Result",
+          "enum": [
+            "lose",
+            "win",
+            "tie"
+          ]
+        },
+        "score": {
+          "type": "integer"
+        },
+        "game": {
+          "type": "object",
+          "$ref": "#/definitions/Game"
+        }
+      }
+    },
+    "Game": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "player_vs_player",
+            "player_vs_computer"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "description": "Game Result",
+          "enum": [
+            "lose",
+            "win",
+            "tie"
+          ]
+        },
+        "challengerId": {
+          "type": "string"
+        },
+        "opponentId": {
+          "type": "string"
+        },
+        "moves": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

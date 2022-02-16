@@ -11,8 +11,8 @@ import logger from './utils/logger';
 import config from './utils/config';
 import { ip } from './utils/meta';
 import bindRoutes from './routes';
+import swaggerDocument from './swagger/swagger.json';
 
-const swaggerDocument = fs.readFileSync(path.resolve(__dirname, '../swagger/swagger.json'), 'utf8');
 const app = express();
 
 app.use(morgan('tiny'));
@@ -20,7 +20,7 @@ app.use(morgan('tiny'));
 app.use(bodyParser.json());
 
 // Serve Swaggger API Docs
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(JSON.parse(swaggerDocument.toString())));
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Dev-only: tiny UI
 // app.use('/ui', express.static('./public'));
